@@ -390,6 +390,7 @@
         <module>nosqlunit-dynamodb</module>
         <module>nosqlunit-marklogic</module>
         <module>nosqlunit-influxdb</module>
+        <module>nosqlunit-rethinkdb</module>
     </modules>
 
     <build>

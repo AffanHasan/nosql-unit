@@ -3321,6 +3321,142 @@ described in Redis manual.
 > substitution of Redis. Feel free to notify any issue of this
 > implementation so can be fixed or implemented.
 
+RethinkDb Engine
+==============
+
+RethinkDb
+=========
+
+RethinkDB is the first open-source, scalable JSON database built from the ground up for the realtime web. It inverts the traditional database architecture by exposing an exciting new access model – instead of polling for changes, the developer can tell RethinkDB to continuously push updated query results to applications in realtime. RethinkDB’s realtime push architecture dramatically reduces the time and effort necessary to build scalable realtime apps.
+
+**NoSQLUnit** do not provides any support for in-memory RethinkDb as in-memory mode is not supported by RethinkDb vendor, **NoSQLUnit** only supports integration testing for RethinkDb when RethinkDb is installed on host machine **with it's default settings**.
+
+Lifecycle Management Rule
+
+---------------------- ------------------------------------------------------
+NoSQLUnit Management   com.lordofthejars.nosqlunit.rethinkdb.ManagedRethinkDb
+---------------------- ------------------------------------------------------
+
+Maven Setup
+-----------
+
+To use **NoSQLUnit** with DynamoDb you only need to add next dependency:
+
+~~~~ {.xml}
+<dependency>
+    <groupId>com.lordofthejars</groupId>
+    <artifactId>nosqlunit-rethinkdb</artifactId>
+    <version>${version.nosqlunit}</version>
+</dependency>
+~~~~
+
+Dataset Format
+--------------
+
+Default dataset file format in *RethinknDb* module is *json* .
+
+Datasets must have next format:
+
+~~~~ {.json}
+{
+    "table1": [
+    {
+        "attribute_1": { "type": "value1" },
+        "attribute_2": { "type": "value2" }
+    },
+    {
+        "attribute_3": { "N :"2" },
+        "attribute_4": { "S": "value4" }
+    }
+    ],
+    "name_table2": [
+        ...
+    ],
+    ....
+}
+~~~~
+
+Getting Started
+---------------
+
+In order to get started RethinkDb needs to be prior installed with default configurations on the host machine.
+
+Let us define initial database state in file **src/main/resources/person_table_initial_seed_file.json**:
+
+~~~ {.json}
+{
+  "person":[]
+}
+~~~
+
+Upon adding a new entity the table "person" will look like as shown in file **src/main/resources/person_table_after_add.json**:
+~~~{.json}
+{
+  "person":[
+    { "id":"123lsdk343434", "name":"john smith" }
+  ]
+}
+~~~
+
+### Lifecycle Management Strategy
+
+In order to start/stop RethinkDb instance before executing all test methods within a test class, define following class rule:
+
+~~~{.java}
+import com.lordofthejars.nosqlunit.rethinkdb.ManagedRethinkDb;
+import static com.lordofthejars.nosqlunit.rethinkdb.ManagedRethinkDbServerRuleBuilder.*;
+
+@ClassRule
+public static final ManagedRethinkDb managedRethinkDb = newManagedRethinkDbRule().build();
+~~~
+
+
+### Configuring DynamoDB Connection
+
+Next step is configuring ***RethinkDb*** rule in charge of maintaining
+database into known state by inserting and deleting defined
+datasets. You must register RethinkDbRule *JUnit* rule class.
+
+~~~~ {.java}
+import static com.lordofthejars.nosqlunit.rethinkdb.RethinkDbRuleBuilder.*;
+
+@Rule
+public RethinkDbRule rethinkDbRule = newRethinkDbRule().build();
+~~~~
+
+Following is the complete example:
+~~~{.java}
+package com.lordofthejars.nosqlunit.rethinkdb;
+
+import static com.rethinkdb.RethinkDB.r;
+import static com.lordofthejars.nosqlunit.rethinkdb.ManagedRethinkDbServerRuleBuilder.*;
+import static com.lordofthejars.nosqlunit.rethinkdb.RethinkDbRuleBuilder.*;
+
+public class PersonTest {
+
+  @ClassRule
+  public static final ManagedRethinkDb managedRethinkDb = newManagedRethinkDbRule().build();
+
+  @Rule
+  public final RethinkDbRule rethinkDbRule = newRethinkDbRule().build();
+
+  @Test
+  @UsingDataSet(locations = "person_table_initial_seed_file.json")
+  @ShouldMatchDataSet(location = "person_table_after_add.json")
+  public void shouldAddPerson() {
+    final Map<String, String> person = new LinkedHashMap<>();
+    person.put("id", "123lsdk343434");
+    person.put("name", "john smith");
+    r.db("test") //
+    .table("person") //
+    .insert(person) //
+    .run(connection);
+  }
+}
+~~~
+
+In the above example after successfull insertion of person entity the above test will pass.
+
 DynamoDB Engine
 ==============
 

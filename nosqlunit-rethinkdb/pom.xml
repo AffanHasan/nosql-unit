@@ -1,0 +1,137 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>nosqlunit</artifactId>
+        <groupId>com.lordofthejars</groupId>
+        <version>1.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>nosqlunit-rethinkdb</artifactId>
+
+    <properties>
+        <spring.data.dynamodb.version>5.0.3</spring.data.dynamodb.version>
+        <spring.data.commons.core.version>1.4.1.RELEASE</spring.data.commons.core.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>5.0.10.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+          <version>2.6.7.1</version>
+        </dependency>
+            <!-- https://jitpack.io/#AffanHasan/rethinkdb-spring-boot-starter/1.0.0.RELEASE -->
+        <dependency>
+            <groupId>com.github.AffanHasan</groupId>
+            <artifactId>rethinkdb-spring-boot-starter</artifactId>
+            <version>1.0.0.RELEASE</version>
+        </dependency>
+        <!-- https://jitpack.io/#AffanHasan/rxrethinkdb/1.0.0.RELEASE -->
+        <dependency>
+            <groupId>com.github.AffanHasan</groupId>
+            <artifactId>rxrethinkdb</artifactId>
+            <version>1.0.0.RELEASE</version>
+        </dependency>
+        <!-- https://jitpack.io/#AffanHasan/spring-data-rethinkdb/1.0.0.RELEASE -->
+        <dependency>
+            <groupId>com.github.AffanHasan</groupId>
+            <artifactId>spring-data-rethinkdb</artifactId>
+            <version>1.0.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons-core</artifactId>
+            <version>${spring.data.commons.core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <artifactId>nosqlunit-core</artifactId>
+            <groupId>com.lordofthejars</groupId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
+            <version>1.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>test</includeScope>
+                            <includeTypes>so,dll,dylib</includeTypes>
+                            <outputDirectory>${project.basedir}/native-libs</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>unit-tests</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <includes>
+                                <include>**/*Test.java</include>
+                                <include>**/Test*.java</include>
+                                <include>**/When*.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>%regex[.*integration.*]</exclude>
+                            </excludes>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
